@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bus Timings</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" sizes="192x192" href="icons/192x192.png"> 
+  <link rel="icon" sizes="128x128" href="icons/128x128.png">
+  <link rel="apple-touch-icon" sizes="128x128"  href="icons/128x128.png">
+  <link rel="apple-touch-icon-precomposed" sizes="128x128"  href="icons/128x128.png">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <script src="https://www.gstatic.com/firebasejs/5.3.1/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyDWldWDq4o3iREall8Hdejyjz6hq92OMnM",
+      authDomain: "bus-timings-b3133.firebaseapp.com",
+      databaseURL: "https://bus-timings-b3133.firebaseio.com",
+      projectId: "bus-timings-b3133",
+      storageBucket: "bus-timings-b3133.appspot.com",
+      messagingSenderId: "76643113480"
+    };
+    firebase.initializeApp(config);
+  </script>
+</head>
+
+<body>
+  <div class="p-3 mb-2 bg-primary text-white">
+    <h3 class="display-4 text-center">My Buses</h3>
+  </div>
+
+  <br>
+  <div class="container">
+    <div class="row">
+      <div class="col-6">
+        <h6 class="text-center">Going Office (Bus 197)</h6>
+        <p class="text-center" id="office">Min(s)</p>
+        <p class="text-center" id="office2">Min(s)</p>
+      </div>
+      <div class="col-6">
+        <h6 class="text-center">Going Home (Bus 147)</h6>
+        <p class="text-center" id="home">Min(s)</p>
+        <p class="text-center" id="home2">Min(s)</p>
+      </div>
+    </div>
+
+  </div>
+  <hr>
+  <div id="form" class="container">
+    <div class="row">
+      <div class="col-12">
+        <h6 class="text-center">Enter Bus Information</h6>
+      </div>
+      <div class="col-2"></div>
+      <div class="col-8">
+        <form method="post">
+          <div class="form-group">
+            <label for="buscode">Bus Stop Code</label>
+            <input type="number" class="form-control" required id="buscode" aria-describedby="" placeholder="Bus Code">
+          </div>
+          <div class="form-group">
+            <label for="busID">Bus ID</label>
+            <input type="number" class="form-control" required id="busID" aria-describedby="" placeholder="Bus ID">
+          </div>
+          <button type="submit" id="getTime" class=" btn-block btn btn-primary">Get Time</button>
+        </form>
+      </div>
+      <div class="col-2"></div>
+    </div>
+
+  </div>
+<br>
+<br>
+  <div class="container" id="arrival_container" style="display: none">
+    <div class="row">
+      <div class="col-12">
+        <h3 class="text-center">Bus Arrival</h3>
+      </div>
+      <div class="col-3"></div>
+      <div class="col-6">
+        <h6 class="text-center" id="input-info"></h6>
+       
+        <p class="text-center" id="busArrival">Min(s)</p>
+        <p class="text-center" id="busArrival2">Min(s)</p>
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <button id="refresh" class="btn btn-block btn-success">Refresh</button>
+            </div>
+            <div class="col-12">
+              <br>
+              <button id="reset" class="btn btn-block btn-danger">Reset</button>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      <div class="col-3"></div>
+    </div>
+
+  </div>
+  <br>
+  <br>
+  <br>
+  <p class="text-muted text-center">&copy; MOWGLI MECHA - Bus Arrivals</p>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script>
+    let installPromptEvent;
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        // Prevent Chrome <= 67 from automatically showing the prompt
+        event.preventDefault();
+        // Stash the event so it can be triggered later.
+        installPromptEvent = event;
+        // Update the install UI to notify the user app can be installed
+        document.querySelector('#install-button').disabled = false;
+      });
+
+      btnInstall.addEventListener('click', () => {
+          // Update the install UI to remove the install button
+          document.querySelector('#install-button').disabled = true;
+          // Show the modal add to home screen dialog
+          installPromptEvent.prompt();
+          // Wait for the user to respond to the prompt
+          installPromptEvent.userChoice.then((choice) => {
+            if (choice.outcome === 'accepted') {
+              console.log('User accepted the A2HS prompt');
+            } else {
+              console.log('User dismissed the A2HS prompt');
+            }
+            // Clear the saved prompt since it can't be used again
+            installPromptEvent = null;
+          });
+        });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function () {
+          console.log('Service Worker Registered');
+        });
+    }
+  </script>
+  <script type="text/javascript">
+
+    
+    const url = 'https://arrivelah.herokuapp.com/?id=07319'
+  
+
+    $("#getTime").click(function (e) {
+      e.preventDefault();
+      $("#form").fadeOut();
+      var id = $("#busID").val();
+      var busStopCode = $("#buscode").val();
+      $("#input-info").text("OK, BUS "+ id + " @ " + busStopCode);
+     
+      $("#arrival_container").fadeIn();
+        updateTime('#busArrival', id, busStopCode);
+    });
+
+    $("#reset").click(function(){
+      $("#form").fadeIn();
+      $("#busID").val('');
+      $("#buscode").val('');
+      $("#arrival_container").fadeOut();
+    });
+
+      $("#refresh").click(function () {
+         var id = $("#busID").val();
+        var busStopCode = $("#buscode").val();
+        $("#input-info").text("");
+        $("#input-info").text("OK, BUS " + id + " @ " + busStopCode);
+        updateTime('#busArrival', id, busStopCode);
+        });
+
+    function updateTime(element, busID, busStopCode) {
+      const url = 'https://arrivelah.herokuapp.com/?id=' + busStopCode;
+      var time = 0;
+      var time2 = 0;
+      $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        contentType: 'application/json; charset=utf-8',
+        success: function (d) {
+
+          $.each(d['services'], function (key, value) {
+            if (value['no'] == busID) {
+              time = (d['services'][key]['next']['duration_ms'] / 1000) / 60;
+              time2 = (d['services'][key]['next2']['duration_ms'] / 1000) / 60;
+              $(element).text(Math.ceil(time) + " Min(s)");
+              // SECOND BUS
+              $(element + '2').text(Math.ceil(time2) + " Min(s)");
+            }
+          })
+
+        }
+      })
+    }
+
+    updateTime('#home', 147, '07319');
+    updateTime('#office', 197, '10109');
+
+  </script>
+
+</body>
+
+</html>
